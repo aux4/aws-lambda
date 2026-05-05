@@ -128,7 +128,7 @@
         {
           "name": "deploy",
           "execute": [
-            "aws lambda get-function --function-name ${functionName} --region ${region} param(profile**) > /dev/null 2>&1 && aux4 aux4 lambda update ${functionName} --repository '${repository}' --imageTag '${imageTag}' --region '${region}' --accountId '${accountId}' --profile '${profile}' || aux4 aux4 lambda create ${functionName} --repository '${repository}' --imageTag '${imageTag}' --region '${region}' --accountId '${accountId}' --role '${role}' --profile '${profile}'"
+            "aws lambda get-function --function-name ${functionName} --region ${region} param(profile**) > /dev/null 2>&1 && aux4 aux4 lambda update ${functionName} --repository '${repository}' --imageTag '${imageTag}' --region '${region}' --accountId '${accountId}' --profile '${profile}' --s3Bucket '${s3Bucket}' --s3MountPath '${s3MountPath}' --s3KeyPrefix '${s3KeyPrefix}' || aux4 aux4 lambda create ${functionName} --repository '${repository}' --imageTag '${imageTag}' --region '${region}' --accountId '${accountId}' --role '${role}' --profile '${profile}' --s3Bucket '${s3Bucket}' --s3MountPath '${s3MountPath}' --s3KeyPrefix '${s3KeyPrefix}'"
           ],
           "help": {
             "text": "Create or update a Lambda function from an ECR image",
@@ -166,6 +166,21 @@
                 "name": "profile",
                 "text": "AWS CLI profile",
                 "env": "AWS_PROFILE"
+              },
+              {
+                "name": "s3Bucket",
+                "text": "S3 bucket to mount via S3 Files",
+                "default": ""
+              },
+              {
+                "name": "s3MountPath",
+                "text": "Local mount path for S3 Files",
+                "default": "/var/task"
+              },
+              {
+                "name": "s3KeyPrefix",
+                "text": "S3 key prefix to mount",
+                "default": ""
               }
             ]
           }
@@ -174,7 +189,8 @@
           "name": "create",
           "private": true,
           "execute": [
-            "aws lambda create-function --function-name ${functionName} --package-type Image --code ImageUri=${accountId}.dkr.ecr.${region}.amazonaws.com/${repository}:${imageTag} --role ${role} --region ${region} param(profile**)"
+            "aws lambda create-function --function-name ${functionName} --package-type Image --code ImageUri=${accountId}.dkr.ecr.${region}.amazonaws.com/${repository}:${imageTag} --role ${role} --region ${region} param(profile**)",
+            "if(s3Bucket!=) && aws lambda update-function-configuration --function-name ${functionName} --region ${region} param(profile**) --file-system-configs Arn=arn:aws:s3:::${s3Bucket},LocalMountPath=${s3MountPath},KeyPrefix=${s3KeyPrefix} || true"
           ],
           "help": {
             "text": "Create a new Lambda function",
@@ -212,6 +228,21 @@
                 "name": "profile",
                 "text": "AWS CLI profile",
                 "env": "AWS_PROFILE"
+              },
+              {
+                "name": "s3Bucket",
+                "text": "S3 bucket to mount via S3 Files",
+                "default": ""
+              },
+              {
+                "name": "s3MountPath",
+                "text": "Local mount path for S3 Files",
+                "default": "/var/task"
+              },
+              {
+                "name": "s3KeyPrefix",
+                "text": "S3 key prefix to mount",
+                "default": ""
               }
             ]
           }
@@ -220,7 +251,8 @@
           "name": "update",
           "private": true,
           "execute": [
-            "aws lambda update-function-code --function-name ${functionName} --image-uri ${accountId}.dkr.ecr.${region}.amazonaws.com/${repository}:${imageTag} --region ${region} param(profile**)"
+            "aws lambda update-function-code --function-name ${functionName} --image-uri ${accountId}.dkr.ecr.${region}.amazonaws.com/${repository}:${imageTag} --region ${region} param(profile**)",
+            "if(s3Bucket!=) && aws lambda update-function-configuration --function-name ${functionName} --region ${region} param(profile**) --file-system-configs Arn=arn:aws:s3:::${s3Bucket},LocalMountPath=${s3MountPath},KeyPrefix=${s3KeyPrefix} || true"
           ],
           "help": {
             "text": "Update an existing Lambda function image",
@@ -254,6 +286,21 @@
                 "name": "profile",
                 "text": "AWS CLI profile",
                 "env": "AWS_PROFILE"
+              },
+              {
+                "name": "s3Bucket",
+                "text": "S3 bucket to mount via S3 Files",
+                "default": ""
+              },
+              {
+                "name": "s3MountPath",
+                "text": "Local mount path for S3 Files",
+                "default": "/var/task"
+              },
+              {
+                "name": "s3KeyPrefix",
+                "text": "S3 key prefix to mount",
+                "default": ""
               }
             ]
           }

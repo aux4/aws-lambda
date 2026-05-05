@@ -123,6 +123,9 @@ aux4 aux4 lambda deploy my-function \
 | `--accountId` | AWS account ID | -- | `AWS_ACCOUNT_ID` |
 | `--role` | The IAM role ARN for the Lambda function | -- | -- |
 | `--profile` | AWS CLI profile | -- | `AWS_PROFILE` |
+| `--s3Bucket` | S3 bucket to mount via S3 Files | -- | -- |
+| `--s3MountPath` | Local mount path for S3 Files | `/var/task` | -- |
+| `--s3KeyPrefix` | S3 key prefix to mount | -- | -- |
 
 **Note:** The `--role` flag is only required when creating a new function. When updating an existing function, the role is preserved from the original configuration.
 
@@ -174,6 +177,46 @@ aux4 aux4 lambda deploy order-processor \
   --repository order-processor \
   --imageTag v1.1.0
 ```
+
+## S3 Files Integration
+
+Instead of baking the `.aux4` file into the Docker image, you can use [Amazon S3 Files](https://docs.aws.amazon.com/lambda/latest/dg/s3-files.html) to mount an S3 bucket directly into the Lambda filesystem. Reads and writes are synced automatically.
+
+Upload your `.aux4` and any supporting files to S3, then deploy with the S3 Files flags:
+
+```bash
+# Upload .aux4 and config files to S3
+aws s3 sync ./config/ s3://my-bucket/my-function/
+
+# Build the image without baking .aux4 (it comes from S3)
+aux4 aux4 lambda build "process-orders" --tag order-processor --mode HTTP
+
+# Push to ECR
+aux4 aux4 lambda push order-processor --repository order-processor
+
+# Deploy with S3 Files mount
+aux4 aux4 lambda deploy order-processor \
+  --repository order-processor \
+  --role arn:aws:iam::123456789012:role/lambda-execution-role \
+  --s3Bucket my-bucket \
+  --s3KeyPrefix my-function/
+```
+
+The S3 bucket is mounted at `/var/task` by default, making the `.aux4` file available where aux4 expects it. Use `--s3MountPath` to change the mount location.
+
+Commands can reference files from the S3 mount using `${packageDir}`:
+
+```json
+{
+  "name": "process-orders",
+  "execute": [
+    "cat ${packageDir}/templates/email.html",
+    "echo 'processed' > ./result.txt"
+  ]
+}
+```
+
+Files written to the mount path are synced back to S3 automatically.
 
 ## License
 

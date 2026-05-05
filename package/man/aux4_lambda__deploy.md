@@ -15,16 +15,19 @@ AWS credentials are resolved from flags, environment variables, or the AWS CLI p
 #### Usage
 
 ```bash
-aux4 aux4 lambda deploy <functionName> --repository <name> [--imageTag <tag>] [--region <region>] --accountId <account-id> [--role <role-arn>] [--profile <profile>]
+aux4 aux4 lambda deploy <functionName> --repository <name> [--imageTag <tag>] [--region <region>] --accountId <account-id> [--role <role-arn>] [--profile <profile>] [--s3Bucket <bucket>] [--s3KeyPrefix <prefix>] [--s3MountPath <path>]
 ```
 
-functionName  The Lambda function name (positional, required)
---repository  The ECR repository name (required)
---imageTag    The image tag (default: latest)
---region      AWS region (default: us-east-1, env: AWS_REGION)
---accountId   AWS account ID (required, env: AWS_ACCOUNT_ID)
---role        The IAM role ARN for the Lambda function (required for new functions)
---profile     AWS CLI profile (env: AWS_PROFILE)
+functionName   The Lambda function name (positional, required)
+--repository   The ECR repository name (required)
+--imageTag     The image tag (default: latest)
+--region       AWS region (default: us-east-1, env: AWS_REGION)
+--accountId    AWS account ID (required, env: AWS_ACCOUNT_ID)
+--role         The IAM role ARN for the Lambda function (required for new functions)
+--profile      AWS CLI profile (env: AWS_PROFILE)
+--s3Bucket     S3 bucket to mount via S3 Files
+--s3MountPath  Local mount path for S3 Files (default: /var/task)
+--s3KeyPrefix  S3 key prefix to mount
 
 #### Example
 
@@ -45,4 +48,15 @@ aux4 aux4 lambda deploy order-processor \
   --repository order-processor \
   --imageTag v1.1.0 \
   --accountId 123456789012
+```
+
+Deploying with S3 Files (`.aux4` loaded from S3):
+
+```bash
+aux4 aux4 lambda deploy order-processor \
+  --repository order-processor \
+  --accountId 123456789012 \
+  --role arn:aws:iam::123456789012:role/lambda-execution-role \
+  --s3Bucket my-config-bucket \
+  --s3KeyPrefix my-function/
 ```
