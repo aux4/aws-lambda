@@ -124,7 +124,7 @@ aux4 aux4 lambda deploy my-function \
 | `--role` | The IAM role ARN for the Lambda function | -- | -- |
 | `--profile` | AWS CLI profile | -- | `AWS_PROFILE` |
 | `--s3Bucket` | S3 bucket to mount via S3 Files | -- | -- |
-| `--s3MountPath` | Local mount path for S3 Files | `/var/task` | -- |
+| `--s3MountPath` | Local mount path for S3 Files | `/mnt/aux4/files` | -- |
 | `--s3KeyPrefix` | S3 key prefix to mount | -- | -- |
 
 **Note:** The `--role` flag is only required when creating a new function. When updating an existing function, the role is preserved from the original configuration.
@@ -202,7 +202,7 @@ aux4 aux4 lambda deploy order-processor \
   --s3KeyPrefix my-function/
 ```
 
-The S3 bucket is mounted at `/var/task` by default, making the `.aux4` file available where aux4 expects it. Use `--s3MountPath` to change the mount location.
+The S3 bucket is mounted at `/mnt/aux4/files` by default, making the `.aux4` file available where aux4 expects it. Use `--s3MountPath` to change the mount location.
 
 Commands can reference files from the S3 mount using `${packageDir}`:
 

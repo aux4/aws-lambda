@@ -175,7 +175,7 @@
               {
                 "name": "s3MountPath",
                 "text": "Local mount path for S3 Files",
-                "default": "/var/task"
+                "default": "/mnt/aux4/files"
               },
               {
                 "name": "s3KeyPrefix",
@@ -237,7 +237,7 @@
               {
                 "name": "s3MountPath",
                 "text": "Local mount path for S3 Files",
-                "default": "/var/task"
+                "default": "/mnt/aux4/files"
               },
               {
                 "name": "s3KeyPrefix",
@@ -295,7 +295,7 @@
               {
                 "name": "s3MountPath",
                 "text": "Local mount path for S3 Files",
-                "default": "/var/task"
+                "default": "/mnt/aux4/files"
               },
               {
                 "name": "s3KeyPrefix",

@@ -26,7 +26,7 @@ functionName   The Lambda function name (positional, required)
 --role         The IAM role ARN for the Lambda function (required for new functions)
 --profile      AWS CLI profile (env: AWS_PROFILE)
 --s3Bucket     S3 bucket to mount via S3 Files
---s3MountPath  Local mount path for S3 Files (default: /var/task)
+--s3MountPath  Local mount path for S3 Files (default: /mnt/aux4/files)
 --s3KeyPrefix  S3 key prefix to mount
 
 #### Example
