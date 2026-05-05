@@ -1,0 +1,264 @@
+{
+  "scope": "aux4",
+  "name": "aws-lambda",
+  "version": "0.1.0",
+  "description": "aux4 AWS Lambda deployment workflow",
+  "license": "Apache-2.0",
+  "dependencies": [
+    "aux4/docker",
+    "community/registry-aws"
+  ],
+  "system": [
+    [
+      "test:aws --version",
+      "brew:awscli",
+      "linux:awscli"
+    ],
+    [
+      "test:docker --version",
+      "brew:docker",
+      "linux:docker"
+    ]
+  ],
+  "tags": [
+    "aux4",
+    "aws",
+    "lambda"
+  ],
+  "profiles": [
+    {
+      "name": "aux4",
+      "commands": [
+        {
+          "name": "lambda",
+          "execute": [
+            "profile:aux4:lambda"
+          ],
+          "help": {
+            "text": "AWS Lambda deployment commands"
+          }
+        }
+      ]
+    },
+    {
+      "name": "aux4:lambda",
+      "commands": [
+        {
+          "name": "build",
+          "execute": [
+            "aux4 aux4 docker build lambda ${command} --tag '${tag}' --mode '${mode}' --packages '${packages}' --dir '${dir}'"
+          ],
+          "help": {
+            "text": "Build a Lambda Docker image",
+            "variables": [
+              {
+                "name": "command",
+                "text": "The Lambda command to execute",
+                "arg": true
+              },
+              {
+                "name": "tag",
+                "text": "The Docker image tag"
+              },
+              {
+                "name": "mode",
+                "text": "The Lambda execution mode",
+                "default": "",
+                "options": [
+                  "RAW",
+                  "HTTP",
+                  "STEP_FUNCTIONS"
+                ]
+              },
+              {
+                "name": "packages",
+                "text": "aux4 packages to install, separated by commas",
+                "default": ""
+              },
+              {
+                "name": "dir",
+                "text": "The directory to build from",
+                "default": "."
+              }
+            ]
+          }
+        },
+        {
+          "name": "push",
+          "execute": [
+            "aux4 registry aws create ${repository} --region '${region}' --profile '${profile}'",
+            "aux4 registry aws push ${tag} --repository '${repository}' --imageTag '${imageTag}' --region '${region}' --accountId '${accountId}' --profile '${profile}'"
+          ],
+          "help": {
+            "text": "Create ECR repository if needed and push the image",
+            "variables": [
+              {
+                "name": "tag",
+                "text": "The local image tag to push",
+                "arg": true
+              },
+              {
+                "name": "repository",
+                "text": "The ECR repository name"
+              },
+              {
+                "name": "imageTag",
+                "text": "The image tag for ECR",
+                "default": "latest"
+              },
+              {
+                "name": "region",
+                "text": "AWS region",
+                "env": "AWS_REGION",
+                "default": "us-east-1"
+              },
+              {
+                "name": "accountId",
+                "text": "AWS account ID",
+                "env": "AWS_ACCOUNT_ID"
+              },
+              {
+                "name": "profile",
+                "text": "AWS CLI profile",
+                "env": "AWS_PROFILE"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deploy",
+          "execute": [
+            "aws lambda get-function --function-name ${functionName} --region ${region} param(profile**) > /dev/null 2>&1 && aux4 aux4 lambda update ${functionName} --repository '${repository}' --imageTag '${imageTag}' --region '${region}' --accountId '${accountId}' --profile '${profile}' || aux4 aux4 lambda create ${functionName} --repository '${repository}' --imageTag '${imageTag}' --region '${region}' --accountId '${accountId}' --role '${role}' --profile '${profile}'"
+          ],
+          "help": {
+            "text": "Create or update a Lambda function from an ECR image",
+            "variables": [
+              {
+                "name": "functionName",
+                "text": "The Lambda function name",
+                "arg": true
+              },
+              {
+                "name": "repository",
+                "text": "The ECR repository name"
+              },
+              {
+                "name": "imageTag",
+                "text": "The image tag",
+                "default": "latest"
+              },
+              {
+                "name": "region",
+                "text": "AWS region",
+                "env": "AWS_REGION",
+                "default": "us-east-1"
+              },
+              {
+                "name": "accountId",
+                "text": "AWS account ID",
+                "env": "AWS_ACCOUNT_ID"
+              },
+              {
+                "name": "role",
+                "text": "The IAM role ARN for the Lambda function"
+              },
+              {
+                "name": "profile",
+                "text": "AWS CLI profile",
+                "env": "AWS_PROFILE"
+              }
+            ]
+          }
+        },
+        {
+          "name": "create",
+          "private": true,
+          "execute": [
+            "aws lambda create-function --function-name ${functionName} --package-type Image --code ImageUri=${accountId}.dkr.ecr.${region}.amazonaws.com/${repository}:${imageTag} --role ${role} --region ${region} param(profile**)"
+          ],
+          "help": {
+            "text": "Create a new Lambda function",
+            "variables": [
+              {
+                "name": "functionName",
+                "text": "The Lambda function name",
+                "arg": true
+              },
+              {
+                "name": "repository",
+                "text": "The ECR repository name"
+              },
+              {
+                "name": "imageTag",
+                "text": "The image tag",
+                "default": "latest"
+              },
+              {
+                "name": "region",
+                "text": "AWS region",
+                "env": "AWS_REGION",
+                "default": "us-east-1"
+              },
+              {
+                "name": "accountId",
+                "text": "AWS account ID",
+                "env": "AWS_ACCOUNT_ID"
+              },
+              {
+                "name": "role",
+                "text": "The IAM role ARN for the Lambda function"
+              },
+              {
+                "name": "profile",
+                "text": "AWS CLI profile",
+                "env": "AWS_PROFILE"
+              }
+            ]
+          }
+        },
+        {
+          "name": "update",
+          "private": true,
+          "execute": [
+            "aws lambda update-function-code --function-name ${functionName} --image-uri ${accountId}.dkr.ecr.${region}.amazonaws.com/${repository}:${imageTag} --region ${region} param(profile**)"
+          ],
+          "help": {
+            "text": "Update an existing Lambda function image",
+            "variables": [
+              {
+                "name": "functionName",
+                "text": "The Lambda function name",
+                "arg": true
+              },
+              {
+                "name": "repository",
+                "text": "The ECR repository name"
+              },
+              {
+                "name": "imageTag",
+                "text": "The image tag",
+                "default": "latest"
+              },
+              {
+                "name": "region",
+                "text": "AWS region",
+                "env": "AWS_REGION",
+                "default": "us-east-1"
+              },
+              {
+                "name": "accountId",
+                "text": "AWS account ID",
+                "env": "AWS_ACCOUNT_ID"
+              },
+              {
+                "name": "profile",
+                "text": "AWS CLI profile",
+                "env": "AWS_PROFILE"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
