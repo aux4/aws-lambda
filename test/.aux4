@@ -1,0 +1,71 @@
+{
+  "profiles": [
+    {
+      "name": "main",
+      "commands": [
+        {
+          "name": "hello",
+          "execute": [
+            "echo hello ${event.name}"
+          ],
+          "help": {
+            "text": "say hello",
+            "variables": [
+              {
+                "name": "event.name",
+                "text": "the name to greet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "greet",
+          "execute": [
+            "echo hello ${event.firstName} ${event.lastName}"
+          ],
+          "help": {
+            "text": "greet with full name",
+            "variables": [
+              {
+                "name": "event.firstName",
+                "text": "first name"
+              },
+              {
+                "name": "event.lastName",
+                "text": "last name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "echo-stdin",
+          "execute": [
+            "echo ${event}"
+          ],
+          "help": {
+            "text": "echo the full event as received"
+          }
+        },
+        {
+          "name": "fail",
+          "execute": [
+            "echo 'something went wrong' >&2 && exit 1"
+          ],
+          "help": {
+            "text": "always fails with stderr output"
+          }
+        },
+        {
+          "name": "both",
+          "execute": [
+            "echo 'stdout output'",
+            "echo 'stderr output' >&2"
+          ],
+          "help": {
+            "text": "writes to both stdout and stderr"
+          }
+        }
+      ]
+    }
+  ]
+}
